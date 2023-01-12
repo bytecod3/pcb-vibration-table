@@ -12,18 +12,18 @@ class HardwareBindings:
 
         # init deque to buffer most recent values
         self.x_values = deque([0.0]*self.max_length)
-        self.y_values = deque([0.0]*self.max_length)
-        self.z_values = deque([0.0]*self.max_length)
+        # self.y_values = deque([0.0]*self.max_length)
+        # self.z_values = deque([0.0]*self.max_length)
 
     def buffer(self, data):
         """
         Get 3 values from serial port (x, y, z)
         Add this values to respective buffers
         """
-        assert(len(data) == 3)
+        # assert(len(data) == 3)
         self.add_to_deque(self.x_values, data[0])
-        self.add_to_deque(self.y_values, data[1])
-        self.add_to_deque(self.z_values, data[2])
+        # self.add_to_deque(self.y_values, data[1])
+        # self.add_to_deque(self.z_values, data[2])
 
     def add_to_deque(self, buf, val):
         """
@@ -33,11 +33,19 @@ class HardwareBindings:
         buf.pop()
         buf.appendleft()
 
-    def stop(self):
-        pass
+    def update(self):
+        try:
+            input_data = self.ser.readline()
+            data = [float(val) for val in input_data.split()]
+            print(data)
 
-    def serial_init(self):
-        pass
+            # add data to deque
+            # todo: assert for length = 3
+            self.buffer(data)
+        except:
+            pass
+
+
 
     def save_to_file(self):
         pass
@@ -49,3 +57,5 @@ class HardwareBindings:
         self.ser.flush()
         self.ser.close()
 
+    def stop(self):
+            pass

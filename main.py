@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter.messagebox import *
@@ -8,6 +9,10 @@ from hardware_bindings import HardwareBindings
 
 class Application:
     def __init__(self, parent):
+        # simulation parameters
+        self.max_time = 0
+        self.user_port = ""
+
         self.parent = parent
 
         # main window parameters
@@ -51,6 +56,13 @@ class Application:
         self.create_widgets()
 
     def create_widgets(self):
+
+        # get the serial port entered
+        self.serial_port = StringVar()
+
+        # get the simulation time in seconds
+        self.sim_time = IntVar()
+
         # app frame
         self.main_frame = Frame(self.parent, padx=15, pady=15)
         self.main_frame.grid(column=0, row=0)
@@ -87,12 +99,12 @@ class Application:
         self.serial_port_select_lbl = Label(self.serial_port_frame, self.label_config, text="Serial port:")
         self.serial_port_select_lbl.grid(column=0, row=0, pady=5, rowspan=1)
 
-        self.serial_port_input = Entry(self.serial_port_frame, self.input_config)
+        self.serial_port_input = Entry(self.serial_port_frame, self.input_config, textvariable=self.serial_port)
         self.serial_port_input.grid(column=1, row=0, pady=5)
 
         self.simulation_time = Label(self.serial_port_frame, self.label_config, text="Simulation time (sec): ")
         self.simulation_time.grid(column=0, row=1)
-        self.simulation_time_input = NumericEntry(self.serial_port_frame)
+        self.simulation_time_input = NumericEntry(self.serial_port_frame, textvariable=self.sim_time)
         self.simulation_time_input.config(self.input_config)
         self.simulation_time_input.grid(column=1, row=1)
 
@@ -121,8 +133,38 @@ class Application:
         Send command to start the motor
         Initialize graphing
         """
-        vibrationObject = HardwareBindings()
 
+        # check for empty entries
+        if not self.sim_time.get():
+            # error message box
+            flag = 1
+            self.messenger(flag, "Empty simulation time", "Simulation time cannot be empty!")
+
+        else:
+            cap = 20  # maximum simulation time allowed 20 sec. todo: change cap
+            if self.sim_time.get() > cap:
+                self.max_time = cap
+            else:
+                self.max_time = self.sim_time.get()
+
+        if not self.serial_port.get():
+            flag = 1
+            self.messenger(flag, "Empty serial port", "Serial port cannot be empty!")
+        else:
+            self.user_port = self.serial_port.get()
+
+        # capitalize serial port
+        print(self.user_port)
+        print(self.max_time)
+
+        vibrationObject = HardwareBindings(self.user_port, 9600, self.max_time)
+        vibrationObject.update() # debug
+
+    def messenger(self, flag,  title, message):
+        if flag:
+            messagebox.showerror(title, message)
+        else:
+            messagebox.showinfo(title, message)
 
 
 def render_GUI():
