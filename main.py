@@ -157,8 +157,8 @@ class Application:
         print(self.user_port)
         print(self.max_time)
 
-        vibrationObject = HardwareBindings(self.user_port, 9600, self.max_time)
-        vibrationObject.update() # debug
+        vibrationObject = HardwareBindings(self.user_port, 9600,self.max_time)
+        vibrationObject.process_data()
 
     def messenger(self, flag,  title, message):
         if flag:
